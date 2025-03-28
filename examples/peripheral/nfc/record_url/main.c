@@ -58,32 +58,31 @@
 
 /** @snippet [NFC URI usage_0] */
 static const uint8_t m_url[] =
-    {'m', 'a', 'k', 'e', 'r', 'd', 'i', 'a', 'r', 'y', '.', 'c', 'o', 'm'}; //URL "makerdiary.com"
+    {'o', 'u', 't', 'i', 'l', 's', 'e', 'n', 'l', 'i', 'g', 'n', 'e', '.', 'c', 'a'}; // URL "makerdiary.com"
 
 uint8_t m_ndef_msg_buf[256];
 /** @snippet [NFC URI usage_0] */
 /**
  * @brief Callback function for handling NFC events.
  */
-static void nfc_callback(void * p_context, nfc_t2t_event_t event, const uint8_t * p_data, size_t data_length)
+static void nfc_callback(void *p_context, nfc_t2t_event_t event, const uint8_t *p_data, size_t data_length)
 {
     (void)p_context;
 
     switch (event)
     {
-        case NFC_T2T_EVENT_FIELD_ON:
-            bsp_board_led_on(LED_B_IDX);
-            break;
+    case NFC_T2T_EVENT_FIELD_ON:
+        bsp_board_led_on(LED_B_IDX);
+        break;
 
-        case NFC_T2T_EVENT_FIELD_OFF:
-            bsp_board_led_off(LED_B_IDX);
-            break;
+    case NFC_T2T_EVENT_FIELD_OFF:
+        bsp_board_led_off(LED_B_IDX);
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 }
-
 
 /**
  *@brief Function for initializing logging.
@@ -96,13 +95,12 @@ static void log_init(void)
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
-
 /**
  * @brief Function for application main entry.
  */
 int main(void)
 {
-    uint32_t  err_code;
+    uint32_t err_code;
 
     log_init();
 
@@ -118,11 +116,11 @@ int main(void)
     uint32_t len = sizeof(m_ndef_msg_buf);
 
     /* Encode URI message into buffer */
-    err_code = nfc_uri_msg_encode( NFC_URI_HTTP_WWW,
-                                   m_url,
-                                   sizeof(m_url),
-                                   m_ndef_msg_buf,
-                                   &len);
+    err_code = nfc_uri_msg_encode(NFC_URI_HTTPS,
+                                  m_url,
+                                  sizeof(m_url),
+                                  m_ndef_msg_buf,
+                                  &len);
 
     APP_ERROR_CHECK(err_code);
     /** @snippet [NFC URI usage_1] */
