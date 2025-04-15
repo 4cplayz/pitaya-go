@@ -49,6 +49,35 @@
 // <h> nRF_Drivers 
 
 //==========================================================
+// <e> GPIOTE_ENABLED - nrf_drv_gpiote - GPIOTE peripheral driver - legacy layer
+//==========================================================
+#ifndef GPIOTE_ENABLED
+#define GPIOTE_ENABLED 1
+#endif
+// <o> GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS - Number of lower power input pins 
+#ifndef GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS
+#define GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS 4
+#endif
+
+// <o> GPIOTE_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef GPIOTE_CONFIG_IRQ_PRIORITY
+#define GPIOTE_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// </e>
+
 // <e> NRFX_CLOCK_ENABLED - nrfx_clock - CLOCK peripheral driver
 //==========================================================
 #ifndef NRFX_CLOCK_ENABLED
@@ -134,6 +163,126 @@
 
 // </e>
 
+// <e> NRFX_GPIOTE_ENABLED - nrfx_gpiote - GPIOTE peripheral driver
+//==========================================================
+#ifndef NRFX_GPIOTE_ENABLED
+#define NRFX_GPIOTE_ENABLED 1
+#endif
+// <o> NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS - Number of lower power input pins 
+#ifndef NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS
+#define NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS 1
+#endif
+
+// <o> NRFX_GPIOTE_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef NRFX_GPIOTE_CONFIG_IRQ_PRIORITY
+#define NRFX_GPIOTE_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <e> NRFX_GPIOTE_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRFX_GPIOTE_CONFIG_LOG_ENABLED
+#define NRFX_GPIOTE_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_GPIOTE_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRFX_GPIOTE_CONFIG_LOG_LEVEL
+#define NRFX_GPIOTE_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> NRFX_GPIOTE_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_GPIOTE_CONFIG_INFO_COLOR
+#define NRFX_GPIOTE_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRFX_GPIOTE_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRFX_GPIOTE_CONFIG_DEBUG_COLOR
+#define NRFX_GPIOTE_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// </e>
+
+// <e> NRFX_POWER_ENABLED - nrfx_power - POWER peripheral driver
+//==========================================================
+#ifndef NRFX_POWER_ENABLED
+#define NRFX_POWER_ENABLED 1
+#endif
+// <o> NRFX_POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef NRFX_POWER_CONFIG_IRQ_PRIORITY
+#define NRFX_POWER_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCEN
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCEN 0
+#endif
+
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCENHV
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCENHV 0
+#endif
+
+// </e>
+
+
+//==========================================================
 // <e> NRFX_PRS_ENABLED - nrfx_prs - Peripheral Resource Sharing module
 //==========================================================
 #ifndef NRFX_PRS_ENABLED
@@ -224,6 +373,134 @@
 #endif
 
 // </e>
+
+// </e>
+
+// <e> NRFX_QSPI_ENABLED - nrfx_qspi - QSPI peripheral driver
+//==========================================================
+#ifndef NRFX_QSPI_ENABLED
+#define NRFX_QSPI_ENABLED 1
+#endif
+// <o> NRFX_QSPI_CONFIG_SCK_DELAY - tSHSL, tWHSL and tSHWL in number of 16 MHz periods (62.5 ns).  <0-255> 
+
+
+#ifndef NRFX_QSPI_CONFIG_SCK_DELAY
+#define NRFX_QSPI_CONFIG_SCK_DELAY 1
+#endif
+
+// <o> NRFX_QSPI_CONFIG_XIP_OFFSET - Address offset in the external memory for Execute in Place operation. 
+#ifndef NRFX_QSPI_CONFIG_XIP_OFFSET
+#define NRFX_QSPI_CONFIG_XIP_OFFSET 0
+#endif
+
+// <o> NRFX_QSPI_CONFIG_READOC  - Number of data lines and opcode used for reading.
+ 
+// <0=> FastRead 
+// <1=> Read2O 
+// <2=> Read2IO 
+// <3=> Read4O 
+// <4=> Read4IO 
+
+#ifndef NRFX_QSPI_CONFIG_READOC
+#define NRFX_QSPI_CONFIG_READOC 0
+#endif
+
+// <o> NRFX_QSPI_CONFIG_WRITEOC  - Number of data lines and opcode used for writing.
+ 
+// <0=> PP 
+// <1=> PP2O 
+// <2=> PP4O 
+// <3=> PP4IO 
+
+#ifndef NRFX_QSPI_CONFIG_WRITEOC
+#define NRFX_QSPI_CONFIG_WRITEOC 0
+#endif
+
+// <o> NRFX_QSPI_CONFIG_ADDRMODE  - Addressing mode.
+ 
+// <0=> 24bit 
+// <1=> 32bit 
+
+#ifndef NRFX_QSPI_CONFIG_ADDRMODE
+#define NRFX_QSPI_CONFIG_ADDRMODE 0
+#endif
+
+// <o> NRFX_QSPI_CONFIG_MODE  - SPI mode.
+ 
+// <0=> Mode 0 
+// <1=> Mode 1 
+
+#ifndef NRFX_QSPI_CONFIG_MODE
+#define NRFX_QSPI_CONFIG_MODE 0
+#endif
+
+// <o> NRFX_QSPI_CONFIG_FREQUENCY  - Frequency divider.
+ 
+// <0=> 32MHz/1 
+// <1=> 32MHz/2 
+// <2=> 32MHz/3 
+// <3=> 32MHz/4 
+// <4=> 32MHz/5 
+// <5=> 32MHz/6 
+// <6=> 32MHz/7 
+// <7=> 32MHz/8 
+// <8=> 32MHz/9 
+// <9=> 32MHz/10 
+// <10=> 32MHz/11 
+// <11=> 32MHz/12 
+// <12=> 32MHz/13 
+// <13=> 32MHz/14 
+// <14=> 32MHz/15 
+// <15=> 32MHz/16 
+
+#ifndef NRFX_QSPI_CONFIG_FREQUENCY
+#define NRFX_QSPI_CONFIG_FREQUENCY 15
+#endif
+
+// <s> NRFX_QSPI_PIN_SCK - SCK pin value.
+#ifndef NRFX_QSPI_PIN_SCK
+#define NRFX_QSPI_PIN_SCK NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> NRFX_QSPI_PIN_CSN - CSN pin value.
+#ifndef NRFX_QSPI_PIN_CSN
+#define NRFX_QSPI_PIN_CSN NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> NRFX_QSPI_PIN_IO0 - IO0 pin value.
+#ifndef NRFX_QSPI_PIN_IO0
+#define NRFX_QSPI_PIN_IO0 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> NRFX_QSPI_PIN_IO1 - IO1 pin value.
+#ifndef NRFX_QSPI_PIN_IO1
+#define NRFX_QSPI_PIN_IO1 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> NRFX_QSPI_PIN_IO2 - IO2 pin value.
+#ifndef NRFX_QSPI_PIN_IO2
+#define NRFX_QSPI_PIN_IO2 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> NRFX_QSPI_PIN_IO3 - IO3 pin value.
+#ifndef NRFX_QSPI_PIN_IO3
+#define NRFX_QSPI_PIN_IO3 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <o> NRFX_QSPI_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef NRFX_QSPI_CONFIG_IRQ_PRIORITY
+#define NRFX_QSPI_CONFIG_IRQ_PRIORITY 6
+#endif
 
 // </e>
 
@@ -510,6 +787,178 @@
 
 // </e>
 
+// <e> POWER_ENABLED - nrf_drv_power - POWER peripheral driver - legacy layer
+//==========================================================
+#ifndef POWER_ENABLED
+#define POWER_ENABLED 1
+#endif
+// <o> POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef POWER_CONFIG_IRQ_PRIORITY
+#define POWER_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <q> POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef POWER_CONFIG_DEFAULT_DCDCEN
+#define POWER_CONFIG_DEFAULT_DCDCEN 0
+#endif
+
+// <q> POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef POWER_CONFIG_DEFAULT_DCDCENHV
+#define POWER_CONFIG_DEFAULT_DCDCENHV 0
+#endif
+
+// </e>
+
+// <e> QSPI_ENABLED - nrf_drv_qspi - QSPI peripheral driver - legacy layer
+//==========================================================
+#ifndef QSPI_ENABLED
+#define QSPI_ENABLED 1
+#endif
+// <o> QSPI_CONFIG_SCK_DELAY - tSHSL, tWHSL and tSHWL in number of 16 MHz periods (62.5 ns).  <0-255> 
+
+
+#ifndef QSPI_CONFIG_SCK_DELAY
+#define QSPI_CONFIG_SCK_DELAY 1
+#endif
+
+// <o> QSPI_CONFIG_XIP_OFFSET - Address offset in the external memory for Execute in Place operation. 
+#ifndef QSPI_CONFIG_XIP_OFFSET
+#define QSPI_CONFIG_XIP_OFFSET 0
+#endif
+
+// <o> QSPI_CONFIG_READOC  - Number of data lines and opcode used for reading.
+ 
+// <0=> FastRead 
+// <1=> Read2O 
+// <2=> Read2IO 
+// <3=> Read4O 
+// <4=> Read4IO 
+
+#ifndef QSPI_CONFIG_READOC
+#define QSPI_CONFIG_READOC 4
+#endif
+
+// <o> QSPI_CONFIG_WRITEOC  - Number of data lines and opcode used for writing.
+ 
+// <0=> PP 
+// <1=> PP2O 
+// <2=> PP4O 
+// <3=> PP4IO 
+
+#ifndef QSPI_CONFIG_WRITEOC
+#define QSPI_CONFIG_WRITEOC 3
+#endif
+
+// <o> QSPI_CONFIG_ADDRMODE  - Addressing mode.
+ 
+// <0=> 24bit 
+// <1=> 32bit 
+
+#ifndef QSPI_CONFIG_ADDRMODE
+#define QSPI_CONFIG_ADDRMODE 0
+#endif
+
+// <o> QSPI_CONFIG_MODE  - SPI mode.
+ 
+// <0=> Mode 0 
+// <1=> Mode 1 
+
+#ifndef QSPI_CONFIG_MODE
+#define QSPI_CONFIG_MODE 0
+#endif
+
+// <o> QSPI_CONFIG_FREQUENCY  - Frequency divider.
+ 
+// <0=> 32MHz/1 
+// <1=> 32MHz/2 
+// <2=> 32MHz/3 
+// <3=> 32MHz/4 
+// <4=> 32MHz/5 
+// <5=> 32MHz/6 
+// <6=> 32MHz/7 
+// <7=> 32MHz/8 
+// <8=> 32MHz/9 
+// <9=> 32MHz/10 
+// <10=> 32MHz/11 
+// <11=> 32MHz/12 
+// <12=> 32MHz/13 
+// <13=> 32MHz/14 
+// <14=> 32MHz/15 
+// <15=> 32MHz/16 
+
+#ifndef QSPI_CONFIG_FREQUENCY
+#define QSPI_CONFIG_FREQUENCY 1
+#endif
+
+// <s> QSPI_PIN_SCK - SCK pin value.
+#ifndef QSPI_PIN_SCK
+#define QSPI_PIN_SCK NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> QSPI_PIN_CSN - CSN pin value.
+#ifndef QSPI_PIN_CSN
+#define QSPI_PIN_CSN NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> QSPI_PIN_IO0 - IO0 pin value.
+#ifndef QSPI_PIN_IO0
+#define QSPI_PIN_IO0 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> QSPI_PIN_IO1 - IO1 pin value.
+#ifndef QSPI_PIN_IO1
+#define QSPI_PIN_IO1 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> QSPI_PIN_IO2 - IO2 pin value.
+#ifndef QSPI_PIN_IO2
+#define QSPI_PIN_IO2 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <s> QSPI_PIN_IO3 - IO3 pin value.
+#ifndef QSPI_PIN_IO3
+#define QSPI_PIN_IO3 NRF_QSPI_PIN_NOT_CONNECTED
+#endif
+
+// <o> QSPI_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef QSPI_CONFIG_IRQ_PRIORITY
+#define QSPI_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// </e>
+
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver - legacy layer
 //==========================================================
 #ifndef UART_ENABLED
@@ -610,6 +1059,62 @@
 
 // </e>
 
+// <e> USBD_ENABLED - nrf_drv_usbd - USB driver
+//==========================================================
+#ifndef USBD_ENABLED
+#define USBD_ENABLED 1
+#endif
+// <o> USBD_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef USBD_CONFIG_IRQ_PRIORITY
+#define USBD_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <o> USBD_CONFIG_DMASCHEDULER_MODE  - USBD SMA scheduler working scheme
+ 
+// <0=> Prioritized access 
+// <1=> Round Robin 
+
+#ifndef USBD_CONFIG_DMASCHEDULER_MODE
+#define USBD_CONFIG_DMASCHEDULER_MODE 0
+#endif
+
+// <q> USBD_CONFIG_DMASCHEDULER_ISO_BOOST  - Give priority to isochronous transfers
+ 
+
+// <i> This option gives priority to isochronous transfers.
+// <i> Enabling it assures that isochronous transfers are always processed,
+// <i> even if multiple other transfers are pending.
+// <i> Isochronous endpoints are prioritized before the usbd_dma_scheduler_algorithm
+// <i> function is called, so the option is independent of the algorithm chosen.
+
+#ifndef USBD_CONFIG_DMASCHEDULER_ISO_BOOST
+#define USBD_CONFIG_DMASCHEDULER_ISO_BOOST 1
+#endif
+
+// <q> USBD_CONFIG_ISO_IN_ZLP  - Respond to an IN token on ISO IN endpoint with ZLP when no data is ready
+ 
+
+// <i> If set, ISO IN endpoint will respond to an IN token with ZLP when no data is ready to be sent.
+// <i> Else, there will be no response.
+
+#ifndef USBD_CONFIG_ISO_IN_ZLP
+#define USBD_CONFIG_ISO_IN_ZLP 0
+#endif
+
+// </e>
+
 // </h> 
 //==========================================================
 
@@ -634,6 +1139,380 @@
 
 #ifndef APP_UART_DRIVER_INSTANCE
 #define APP_UART_DRIVER_INSTANCE 0
+
+// <e> APP_SCHEDULER_ENABLED - app_scheduler - Events scheduler
+//==========================================================
+#ifndef APP_SCHEDULER_ENABLED
+#define APP_SCHEDULER_ENABLED 1
+#endif
+// <q> APP_SCHEDULER_WITH_PAUSE  - Enabling pause feature
+ 
+
+#ifndef APP_SCHEDULER_WITH_PAUSE
+#define APP_SCHEDULER_WITH_PAUSE 0
+#endif
+
+// <q> APP_SCHEDULER_WITH_PROFILER  - Enabling scheduler profiling
+ 
+
+#ifndef APP_SCHEDULER_WITH_PROFILER
+#define APP_SCHEDULER_WITH_PROFILER 0
+#endif
+
+// </e>
+
+// <e> APP_TIMER_ENABLED - app_timer - Application timer functionality
+//==========================================================
+#ifndef APP_TIMER_ENABLED
+#define APP_TIMER_ENABLED 1
+#endif
+// <o> APP_TIMER_CONFIG_RTC_FREQUENCY  - Configure RTC prescaler.
+ 
+// <0=> 32768 Hz 
+// <1=> 16384 Hz 
+// <3=> 8192 Hz 
+// <7=> 4096 Hz 
+// <15=> 2048 Hz 
+// <31=> 1024 Hz 
+
+#ifndef APP_TIMER_CONFIG_RTC_FREQUENCY
+#define APP_TIMER_CONFIG_RTC_FREQUENCY 0
+#endif
+
+// <o> APP_TIMER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef APP_TIMER_CONFIG_IRQ_PRIORITY
+#define APP_TIMER_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <o> APP_TIMER_CONFIG_OP_QUEUE_SIZE - Capacity of timer requests queue. 
+// <i> Size of the queue depends on how many timers are used
+// <i> in the system, how often timers are started and overall
+// <i> system latency. If queue size is too small app_timer calls
+// <i> will fail.
+
+#ifndef APP_TIMER_CONFIG_OP_QUEUE_SIZE
+#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 10
+#endif
+
+// <q> APP_TIMER_CONFIG_USE_SCHEDULER  - Enable scheduling app_timer events to app_scheduler
+ 
+
+#ifndef APP_TIMER_CONFIG_USE_SCHEDULER
+#define APP_TIMER_CONFIG_USE_SCHEDULER 1
+#endif
+
+// <q> APP_TIMER_KEEPS_RTC_ACTIVE  - Enable RTC always on
+ 
+
+// <i> If option is enabled RTC is kept running even if there is no active timers.
+// <i> This option can be used when app_timer is used for timestamping.
+
+#ifndef APP_TIMER_KEEPS_RTC_ACTIVE
+#define APP_TIMER_KEEPS_RTC_ACTIVE 0
+#endif
+
+// <o> APP_TIMER_SAFE_WINDOW_MS - Maximum possible latency (in milliseconds) of handling app_timer event. 
+// <i> Maximum possible timeout that can be set is reduced by safe window.
+// <i> Example: RTC frequency 16384 Hz, maximum possible timeout 1024 seconds - APP_TIMER_SAFE_WINDOW_MS.
+// <i> Since RTC is not stopped when processor is halted in debugging session, this value
+// <i> must cover it if debugging is needed. It is possible to halt processor for APP_TIMER_SAFE_WINDOW_MS
+// <i> without corrupting app_timer behavior.
+
+#ifndef APP_TIMER_SAFE_WINDOW_MS
+#define APP_TIMER_SAFE_WINDOW_MS 300000
+#endif
+
+// <h> App Timer Legacy configuration - Legacy configuration.
+
+//==========================================================
+// <q> APP_TIMER_WITH_PROFILER  - Enable app_timer profiling
+ 
+
+#ifndef APP_TIMER_WITH_PROFILER
+#define APP_TIMER_WITH_PROFILER 0
+#endif
+
+// <q> APP_TIMER_CONFIG_SWI_NUMBER  - Configure SWI instance used.
+ 
+
+#ifndef APP_TIMER_CONFIG_SWI_NUMBER
+#define APP_TIMER_CONFIG_SWI_NUMBER 0
+#endif
+
+// </h> 
+//==========================================================
+
+// </e>
+
+// <e> APP_USBD_ENABLED - app_usbd - USB Device library
+//==========================================================
+#ifndef APP_USBD_ENABLED
+#define APP_USBD_ENABLED 1
+#endif
+// <s> APP_USBD_VID - Vendor ID.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Vendor ID ordered from USB IF: http://www.usb.org/developers/vendor/
+#ifndef APP_USBD_VID
+#define APP_USBD_VID 0x1915
+#endif
+
+// <s> APP_USBD_PID - Product ID.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Selected Product ID
+#ifndef APP_USBD_PID
+#define APP_USBD_PID 0x520F
+#endif
+
+// <o> APP_USBD_DEVICE_VER_MAJOR - Device version, major part.  <0-99> 
+
+
+// <i> Device version, will be converted automatically to BCD notation. Use just decimal values.
+
+#ifndef APP_USBD_DEVICE_VER_MAJOR
+#define APP_USBD_DEVICE_VER_MAJOR 1
+#endif
+
+// <o> APP_USBD_DEVICE_VER_MINOR - Device version, minor part.  <0-99> 
+
+
+// <i> Device version, will be converted automatically to BCD notation. Use just decimal values.
+
+#ifndef APP_USBD_DEVICE_VER_MINOR
+#define APP_USBD_DEVICE_VER_MINOR 0
+#endif
+
+// <q> APP_USBD_CONFIG_SELF_POWERED  - Self-powered device, as opposed to bus-powered.
+ 
+
+#ifndef APP_USBD_CONFIG_SELF_POWERED
+#define APP_USBD_CONFIG_SELF_POWERED 1
+#endif
+
+// <o> APP_USBD_CONFIG_MAX_POWER - MaxPower field in configuration descriptor in milliamps.  <0-500> 
+
+
+#ifndef APP_USBD_CONFIG_MAX_POWER
+#define APP_USBD_CONFIG_MAX_POWER 500
+#endif
+
+// <q> APP_USBD_CONFIG_POWER_EVENTS_PROCESS  - Process power events.
+ 
+
+// <i> Enable processing power events in USB event handler.
+
+#ifndef APP_USBD_CONFIG_POWER_EVENTS_PROCESS
+#define APP_USBD_CONFIG_POWER_EVENTS_PROCESS 1
+#endif
+
+// <e> APP_USBD_CONFIG_EVENT_QUEUE_ENABLE - Enable event queue.
+
+// <i> This is the default configuration when all the events are placed into internal queue.
+// <i> Disable it when an external queue is used like app_scheduler or if you wish to process all events inside interrupts.
+// <i> Processing all events from the interrupt level adds requirement not to call any functions that modifies the USBD library state from the context higher than USB interrupt context.
+// <i> Functions that modify USBD state are functions for sleep, wakeup, start, stop, enable, and disable.
+//==========================================================
+#ifndef APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
+#define APP_USBD_CONFIG_EVENT_QUEUE_ENABLE 0
+#endif
+// <o> APP_USBD_CONFIG_EVENT_QUEUE_SIZE - The size of the event queue.  <16-64> 
+
+
+// <i> The size of the queue for the events that would be processed in the main loop.
+
+#ifndef APP_USBD_CONFIG_EVENT_QUEUE_SIZE
+#define APP_USBD_CONFIG_EVENT_QUEUE_SIZE 32
+#endif
+
+// <o> APP_USBD_CONFIG_SOF_HANDLING_MODE  - Change SOF events handling mode.
+ 
+
+// <i> Normal queue   - SOF events are pushed normally into the event queue.
+// <i> Compress queue - SOF events are counted and binded with other events or executed when the queue is empty.
+// <i>                  This prevents the queue from filling up with SOF events.
+// <i> Interrupt      - SOF events are processed in interrupt.
+// <0=> Normal queue 
+// <1=> Compress queue 
+// <2=> Interrupt 
+
+#ifndef APP_USBD_CONFIG_SOF_HANDLING_MODE
+#define APP_USBD_CONFIG_SOF_HANDLING_MODE 1
+#endif
+
+// </e>
+
+// <q> APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE  - Provide a function that generates timestamps for logs based on the current SOF.
+ 
+
+// <i> The function app_usbd_sof_timestamp_get is implemented if the logger is enabled. 
+// <i> Use it when initializing the logger. 
+// <i> SOF processing is always enabled when this configuration parameter is active. 
+// <i> Note: This option is configured outside of APP_USBD_CONFIG_LOG_ENABLED. 
+// <i> This means that it works even if the logging in this very module is disabled. 
+
+#ifndef APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE
+#define APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE 0
+#endif
+
+// <o> APP_USBD_CONFIG_DESC_STRING_SIZE - Maximum size of the NULL-terminated string of the string descriptor.  <31-254> 
+
+
+// <i> 31 characters can be stored in the internal USB buffer used for transfers.
+// <i> Any value higher than 31 creates an additional buffer just for descriptor strings.
+
+#ifndef APP_USBD_CONFIG_DESC_STRING_SIZE
+#define APP_USBD_CONFIG_DESC_STRING_SIZE 31
+#endif
+
+// <q> APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED  - Enable UTF8 conversion.
+ 
+
+// <i> Enable UTF8-encoded characters. In normal processing, only ASCII characters are available.
+
+#ifndef APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED
+#define APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED 0
+#endif
+
+// <s> APP_USBD_STRINGS_LANGIDS - Supported languages identifiers.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Comma-separated list of supported languages.
+#ifndef APP_USBD_STRINGS_LANGIDS
+#define APP_USBD_STRINGS_LANGIDS APP_USBD_LANG_AND_SUBLANG(APP_USBD_LANG_ENGLISH, APP_USBD_SUBLANG_ENGLISH_US)
+#endif
+
+// <e> APP_USBD_STRING_ID_MANUFACTURER - Define manufacturer string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_MANUFACTURER
+#define APP_USBD_STRING_ID_MANUFACTURER 1
+#endif
+// <q> APP_USBD_STRINGS_MANUFACTURER_EXTERN  - Define whether @ref APP_USBD_STRINGS_MANUFACTURER is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRINGS_MANUFACTURER_EXTERN
+#define APP_USBD_STRINGS_MANUFACTURER_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_MANUFACTURER - String descriptor for the manufacturer name.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Comma-separated list of manufacturer names for each defined language.
+// <i> Use @ref APP_USBD_STRING_DESC macro to create string descriptor from a NULL-terminated string.
+// <i> Use @ref APP_USBD_STRING_RAW8_DESC macro to create string descriptor from comma-separated uint8_t values.
+// <i> Use @ref APP_USBD_STRING_RAW16_DESC macro to create string descriptor from comma-separated uint16_t values.
+// <i> Alternatively, configure the macro to point to any internal variable pointer that already contains the descriptor.
+// <i> Setting string to NULL disables that string.
+// <i> The order of manufacturer names must be the same like in @ref APP_USBD_STRINGS_LANGIDS.
+#ifndef APP_USBD_STRINGS_MANUFACTURER
+#define APP_USBD_STRINGS_MANUFACTURER APP_USBD_STRING_DESC("Nordic Semiconductor")
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_PRODUCT - Define product string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_PRODUCT
+#define APP_USBD_STRING_ID_PRODUCT 2
+#endif
+// <q> APP_USBD_STRINGS_PRODUCT_EXTERN  - Define whether @ref APP_USBD_STRINGS_PRODUCT is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRINGS_PRODUCT_EXTERN
+#define APP_USBD_STRINGS_PRODUCT_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_PRODUCT - String descriptor for the product name.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> List of product names that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRINGS_PRODUCT
+#define APP_USBD_STRINGS_PRODUCT APP_USBD_STRING_DESC("nRF52 USB CDC Demo")
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_SERIAL - Define serial number string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_SERIAL
+#define APP_USBD_STRING_ID_SERIAL 3
+#endif
+// <q> APP_USBD_STRING_SERIAL_EXTERN  - Define whether @ref APP_USBD_STRING_SERIAL is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRING_SERIAL_EXTERN
+#define APP_USBD_STRING_SERIAL_EXTERN 1
+#endif
+
+// <s> APP_USBD_STRING_SERIAL - String descriptor for the serial number.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Serial number that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRING_SERIAL
+#define APP_USBD_STRING_SERIAL g_extern_serial_number
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_CONFIGURATION - Define configuration string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_CONFIGURATION
+#define APP_USBD_STRING_ID_CONFIGURATION 4
+#endif
+// <q> APP_USBD_STRING_CONFIGURATION_EXTERN  - Define whether @ref APP_USBD_STRINGS_CONFIGURATION is created by macro or declared as global variable.
+ 
+
+#ifndef APP_USBD_STRING_CONFIGURATION_EXTERN
+#define APP_USBD_STRING_CONFIGURATION_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_CONFIGURATION - String descriptor for the device configuration.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Configuration string that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRINGS_CONFIGURATION
+#define APP_USBD_STRINGS_CONFIGURATION APP_USBD_STRING_DESC("Default configuration")
+#endif
+
+// </e>
+
+// <s> APP_USBD_STRINGS_USER - Default values for user strings.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> This value stores all application specific user strings with the default initialization.
+// <i> The setup is done by X-macros.
+// <i> Expected macro parameters:
+// <i> @code
+// <i> X(mnemonic, [=str_idx], ...)
+// <i> @endcode
+// <i> - @c mnemonic: Mnemonic of the string descriptor that would be added to
+// <i>                @ref app_usbd_string_desc_idx_t enumerator.
+// <i> - @c str_idx : String index value, can be set or left empty.
+// <i>                For example, WinUSB driver requires descriptor to be present on 0xEE index.
+// <i>                Then use X(USBD_STRING_WINUSB, =0xEE, (APP_USBD_STRING_DESC(...)))
+// <i> - @c ...     : List of string descriptors for each defined language.
+#ifndef APP_USBD_STRINGS_USER
+#define APP_USBD_STRINGS_USER X(APP_USER_1, , APP_USBD_STRING_DESC("User 1"))
 #endif
 
 // </e>
@@ -645,6 +1524,7 @@
 #define HARDFAULT_HANDLER_ENABLED 1
 #endif
 
+//==========================================================
 // <e> NRF_BALLOC_ENABLED - nrf_balloc - Block allocator module
 //==========================================================
 #ifndef NRF_BALLOC_ENABLED
@@ -715,11 +1595,210 @@
 #define NRF_MEMOBJ_ENABLED 1
 #endif
 
+// <e> NRF_PWR_MGMT_ENABLED - nrf_pwr_mgmt - Power management module
+//==========================================================
+#ifndef NRF_PWR_MGMT_ENABLED
+#define NRF_PWR_MGMT_ENABLED 1
+#endif
+// <e> NRF_PWR_MGMT_CONFIG_DEBUG_PIN_ENABLED - Enables pin debug in the module.
+
+// <i> Selected pin will be set when CPU is in sleep mode.
+//==========================================================
+#ifndef NRF_PWR_MGMT_CONFIG_DEBUG_PIN_ENABLED
+#define NRF_PWR_MGMT_CONFIG_DEBUG_PIN_ENABLED 0
+#endif
+// <o> NRF_PWR_MGMT_SLEEP_DEBUG_PIN  - Pin number
+ 
+// <0=> 0 (P0.0) 
+// <1=> 1 (P0.1) 
+// <2=> 2 (P0.2) 
+// <3=> 3 (P0.3) 
+// <4=> 4 (P0.4) 
+// <5=> 5 (P0.5) 
+// <6=> 6 (P0.6) 
+// <7=> 7 (P0.7) 
+// <8=> 8 (P0.8) 
+// <9=> 9 (P0.9) 
+// <10=> 10 (P0.10) 
+// <11=> 11 (P0.11) 
+// <12=> 12 (P0.12) 
+// <13=> 13 (P0.13) 
+// <14=> 14 (P0.14) 
+// <15=> 15 (P0.15) 
+// <16=> 16 (P0.16) 
+// <17=> 17 (P0.17) 
+// <18=> 18 (P0.18) 
+// <19=> 19 (P0.19) 
+// <20=> 20 (P0.20) 
+// <21=> 21 (P0.21) 
+// <22=> 22 (P0.22) 
+// <23=> 23 (P0.23) 
+// <24=> 24 (P0.24) 
+// <25=> 25 (P0.25) 
+// <26=> 26 (P0.26) 
+// <27=> 27 (P0.27) 
+// <28=> 28 (P0.28) 
+// <29=> 29 (P0.29) 
+// <30=> 30 (P0.30) 
+// <31=> 31 (P0.31) 
+// <32=> 32 (P1.0) 
+// <33=> 33 (P1.1) 
+// <34=> 34 (P1.2) 
+// <35=> 35 (P1.3) 
+// <36=> 36 (P1.4) 
+// <37=> 37 (P1.5) 
+// <38=> 38 (P1.6) 
+// <39=> 39 (P1.7) 
+// <40=> 40 (P1.8) 
+// <41=> 41 (P1.9) 
+// <42=> 42 (P1.10) 
+// <43=> 43 (P1.11) 
+// <44=> 44 (P1.12) 
+// <45=> 45 (P1.13) 
+// <46=> 46 (P1.14) 
+// <47=> 47 (P1.15) 
+// <4294967295=> Not connected 
+
+#ifndef NRF_PWR_MGMT_SLEEP_DEBUG_PIN
+#define NRF_PWR_MGMT_SLEEP_DEBUG_PIN 31
+#endif
+
+// </e>
+
+// <q> NRF_PWR_MGMT_CONFIG_CPU_USAGE_MONITOR_ENABLED  - Enables CPU usage monitor.
+ 
+
+// <i> Module will trace percentage of CPU usage in one second intervals.
+
+#ifndef NRF_PWR_MGMT_CONFIG_CPU_USAGE_MONITOR_ENABLED
+#define NRF_PWR_MGMT_CONFIG_CPU_USAGE_MONITOR_ENABLED 0
+#endif
+
+// <e> NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_ENABLED - Enable standby timeout.
+//==========================================================
+#ifndef NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_ENABLED
+#define NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_ENABLED 0
+#endif
+// <o> NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_S - Standby timeout (in seconds). 
+// <i> Shutdown procedure will begin no earlier than after this number of seconds.
+
+#ifndef NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_S
+#define NRF_PWR_MGMT_CONFIG_STANDBY_TIMEOUT_S 3
+#endif
+
+// </e>
+
+// <q> NRF_PWR_MGMT_CONFIG_FPU_SUPPORT_ENABLED  - Enables FPU event cleaning.
+ 
+
+#ifndef NRF_PWR_MGMT_CONFIG_FPU_SUPPORT_ENABLED
+#define NRF_PWR_MGMT_CONFIG_FPU_SUPPORT_ENABLED 1
+#endif
+
+// <q> NRF_PWR_MGMT_CONFIG_AUTO_SHUTDOWN_RETRY  - Blocked shutdown procedure will be retried every second.
+ 
+
+#ifndef NRF_PWR_MGMT_CONFIG_AUTO_SHUTDOWN_RETRY
+#define NRF_PWR_MGMT_CONFIG_AUTO_SHUTDOWN_RETRY 0
+#endif
+
+// <q> NRF_PWR_MGMT_CONFIG_USE_SCHEDULER  - Module will use @ref app_scheduler.
+ 
+
+#ifndef NRF_PWR_MGMT_CONFIG_USE_SCHEDULER
+#define NRF_PWR_MGMT_CONFIG_USE_SCHEDULER 0
+#endif
+
+// <o> NRF_PWR_MGMT_CONFIG_HANDLER_PRIORITY_COUNT - The number of priorities for module handlers. 
+// <i> The number of stages of the shutdown process.
+
+#ifndef NRF_PWR_MGMT_CONFIG_HANDLER_PRIORITY_COUNT
+#define NRF_PWR_MGMT_CONFIG_HANDLER_PRIORITY_COUNT 3
+#endif
+
+// </e>
+
+// <e> NRF_QUEUE_ENABLED - nrf_queue - Queue module
+//==========================================================
+#ifndef NRF_QUEUE_ENABLED
+#define NRF_QUEUE_ENABLED 1
+#endif
+// <q> NRF_QUEUE_CLI_CMDS  - Enable CLI commands specific to the module
+ 
+
+#ifndef NRF_QUEUE_CLI_CMDS
+#define NRF_QUEUE_CLI_CMDS 0
+#endif
+
+// </e>
+
+// <q> NRF_SECTION_ITER_ENABLED  - nrf_section_iter - Section iterator
+ 
+
+#ifndef NRF_SECTION_ITER_ENABLED
+#define NRF_SECTION_ITER_ENABLED 1
+#endif
+
 // <q> NRF_STRERROR_ENABLED  - nrf_strerror - Library for converting error code to string.
  
 
 #ifndef NRF_STRERROR_ENABLED
 #define NRF_STRERROR_ENABLED 1
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> app_button - buttons handling module
+
+//==========================================================
+// <q> BUTTON_ENABLED  - Enables Button module
+ 
+
+#ifndef BUTTON_ENABLED
+#define BUTTON_ENABLED 1
+#endif
+
+// <q> BUTTON_HIGH_ACCURACY_ENABLED  - Enables GPIOTE high accuracy for buttons
+ 
+
+#ifndef BUTTON_HIGH_ACCURACY_ENABLED
+#define BUTTON_HIGH_ACCURACY_ENABLED 0
+#endif
+
+#ifndef BSP_BUTTON_ACTION_PUSH
+#define BSP_BUTTON_ACTION_PUSH (0)
+#endif
+
+#ifndef BSP_BUTTON_ACTION_RELEASE
+#define BSP_BUTTON_ACTION_RELEASE (1)
+#endif
+
+#ifndef BSP_BUTTON_ACTION_LONG_PUSH
+#define BSP_BUTTON_ACTION_LONG_PUSH (2)
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> app_usbd_cdc_acm - USB CDC ACM class
+
+//==========================================================
+// <q> APP_USBD_CDC_ACM_ENABLED  - Enabling USBD CDC ACM Class library
+ 
+
+#ifndef APP_USBD_CDC_ACM_ENABLED
+#define APP_USBD_CDC_ACM_ENABLED 1
+#endif
+
+// <q> APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE  - Send ZLP on write with same size as endpoint
+ 
+
+// <i> If enabled, CDC ACM class will automatically send a zero length packet after transfer which has the same size as endpoint.
+// <i> This may limit throughput if a lot of binary data is sent, but in terminal mode operation it makes sure that the data is always displayed right after it is sent.
+
+#ifndef APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE
+#define APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE 1
 #endif
 
 // </h> 
@@ -890,7 +1969,7 @@
 // <i> Log data is buffered and can be processed in idle.
 
 #ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFERRED 0
 #endif
 
 // <q> NRF_LOG_FILTERS_ENABLED  - Enable dynamic filtering of logs.
@@ -4417,5 +5496,6 @@
 //==========================================================
 
 // <<< end of configuration section >>>
+#endif //SDK_CONFIG_H
 #endif //SDK_CONFIG_H
 

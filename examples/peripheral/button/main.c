@@ -71,28 +71,19 @@
 void configure_console(void);
 
 
+static uint32_t button_press_count = 0;  // Counter for button presses (0-2 internally, displays as 1-3)
+
 static void bsp_event_callback(bsp_event_t ev)
 {
     switch ((unsigned int)ev)
     {
         case CONCAT_2(BSP_EVENT_KEY_, BTN_USER):
         {
-            printf("User button pushed.\r\n");
+            // Increment counter on button press
+            button_press_count = (button_press_count + 1) % 3;  // Cycles through 0, 1, 2 internally
+            uint32_t display_count = button_press_count + 1;    // Display as 1, 2, 3
+            printf("Count: %lu\r\n", display_count);
             bsp_board_led_on(LED_R_IDX);
-            break;
-        }
-        
-        case BTN_USER_KEY_RELEASE:
-        {
-            printf("User button released.\r\n");
-            bsp_board_led_off(LED_R_IDX);
-            break;
-        }
-
-        case BTN_USER_KEY_LONG_PUSH:
-        {
-            printf("User button long pushed.\r\n");
-            bsp_board_led_invert(LED_B_IDX);
             break;
         }
 

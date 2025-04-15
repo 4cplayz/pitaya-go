@@ -1,7 +1,7 @@
 /**
 * Copyright (c) 2019 makerdiary
 * All rights reserved.
-* 
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are
 * met:
@@ -27,9 +27,9 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 */
-/** @file weather_client_demo.c
+/** @file nfc_client_demo.c
  * @brief This example demonstrates the use of the Pitaya Go board
- * to retrieve weather information from openweathermap.org server.
+ * to retrieve NFC link information from a custom API server.
  *
  */
 
@@ -41,16 +41,16 @@
 #include "driver/source/nmasic.h"
 #include "socket/include/socket.h"
 
-#define MAIN_HOST_PORT                  80
-#define MAIN_WEATHER_SERVER_NAME        "api.openweathermap.org"
+#define MAIN_HOST_PORT 3000
+#define MAIN_NFC_SERVER_NAME "192.168.2.26"
 
 /** Receive buffer size. */
-#define MAIN_WIFI_M2M_BUFFER_SIZE       1400
+#define MAIN_WIFI_M2M_BUFFER_SIZE 1400
 
 /** IP address parsing. */
-#define IPV4_BYTE(val, index)           ((val >> (index * 8)) & 0xFF)
+#define IPV4_BYTE(val, index) ((val >> (index * 8)) & 0xFF)
 
-const char * strSecType[M2M_WIFI_NUM_AUTH_TYPES]= {"Invalid", "Open", "WPA/WPA2 personal(PSK)", "WEP (40 or 104) OPEN OR SHARED", "WPA/WPA2 Enterprise.IEEE802.1x"};
+const char *strSecType[M2M_WIFI_NUM_AUTH_TYPES] = {"Invalid", "Open", "WPA/WPA2 personal(PSK)", "WEP (40 or 104) OPEN OR SHARED", "WPA/WPA2 Enterprise.IEEE802.1x"};
 
 /** Mac address information. */
 static uint8_t m_mac_addr[M2M_MAC_ADDRES_LEN];
@@ -58,7 +58,7 @@ static uint8_t m_mac_addr[M2M_MAC_ADDRES_LEN];
 /** User define MAC Address. */
 static char m_user_define_mac_address[] = {0xf8, 0xf0, 0x05, 0x00, 0x00, 0x00};
 
-static nrf_cli_t const * mp_curr_cli = NULL;
+static nrf_cli_t const *mp_curr_cli = NULL;
 
 /** Wi-Fi connection state. */
 static bool m_wifi_connected = false;
@@ -67,11 +67,10 @@ static bool m_wifi_connected = false;
 static SOCKET m_tcp_client_socket = -1;
 
 /** Server host name. */
-static char m_server_host_name[] = MAIN_WEATHER_SERVER_NAME;
+static char m_server_host_name[] = MAIN_NFC_SERVER_NAME;
 
 /** Receive buffer definition. */
 static uint8_t m_tcp_received_buffer[MAIN_WIFI_M2M_BUFFER_SIZE];
-
 
 /**
  * \brief Callback function of IP address.
@@ -86,21 +85,21 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
     struct sockaddr_in addr_in;
 
     nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "\r\n%s IP address is %d.%d.%d.%d\r\n", hostName,
-            (int)IPV4_BYTE(hostIp, 0), (int)IPV4_BYTE(hostIp, 1),
-            (int)IPV4_BYTE(hostIp, 2), (int)IPV4_BYTE(hostIp, 3));
+                    (int)IPV4_BYTE(hostIp, 0), (int)IPV4_BYTE(hostIp, 1),
+                    (int)IPV4_BYTE(hostIp, 2), (int)IPV4_BYTE(hostIp, 3));
 
     addr_in.sin_family = AF_INET;
     addr_in.sin_port = _htons(MAIN_HOST_PORT);
     addr_in.sin_addr.s_addr = hostIp;
 
     /* Create secure socket */
-    if (m_tcp_client_socket < 0) 
+    if (m_tcp_client_socket < 0)
     {
         m_tcp_client_socket = socket(AF_INET, SOCK_STREAM, 0);
     }
 
     /* Check if socket was created successfully */
-    if (m_tcp_client_socket == -1) 
+    if (m_tcp_client_socket == -1)
     {
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "Socket error\r\n");
         nrf_cli_process(mp_curr_cli);
@@ -109,7 +108,7 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
     }
 
     /* If success, connect to socket */
-    if (connect(m_tcp_client_socket, (struct sockaddr *)&addr_in, sizeof(struct sockaddr_in)) != SOCK_ERR_NO_ERROR) 
+    if (connect(m_tcp_client_socket, (struct sockaddr *)&addr_in, sizeof(struct sockaddr_in)) != SOCK_ERR_NO_ERROR)
     {
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "Connect error\r\n");
         nrf_cli_process(mp_curr_cli);
@@ -120,7 +119,61 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
 
     nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Connecting...\r\n");
     nrf_cli_process(mp_curr_cli);
+}
 
+/**
+ * \brief Find a JSON string value by key.
+ *
+ * \param[in] json_str The JSON string to search.
+ * \param[in] key The key to find.
+ * \param[out] value_buf Buffer to store the found value.
+ * \param[in] buf_size Size of the value buffer.
+ *
+ * \return true if key was found and value copied, false otherwise.
+ */
+static bool find_json_string_value(const char *json_str, const char *key, char *value_buf, size_t buf_size)
+{
+    char key_pattern[64];
+    char *value_start, *value_end;
+
+    // Format the key pattern to search for, e.g. "token":"
+    snprintf(key_pattern, sizeof(key_pattern), "\"%s\":\"", key);
+
+    // Find the key
+    value_start = strstr(json_str, key_pattern);
+    if (!value_start)
+    {
+        // Try with spaces
+        snprintf(key_pattern, sizeof(key_pattern), "\"%s\": \"", key);
+        value_start = strstr(json_str, key_pattern);
+        if (!value_start)
+        {
+            return false;
+        }
+    }
+
+    // Move to the beginning of the value
+    value_start += strlen(key_pattern);
+
+    // Find the end of the value (closing quote)
+    value_end = strchr(value_start, '\"');
+    if (!value_end)
+    {
+        return false;
+    }
+
+    // Calculate value length
+    size_t value_len = value_end - value_start;
+    if (value_len >= buf_size)
+    {
+        value_len = buf_size - 1; // Ensure space for null terminator
+    }
+
+    // Copy the value
+    memcpy(value_buf, value_start, value_len);
+    value_buf[value_len] = '\0';
+
+    return true;
 }
 
 /**
@@ -132,25 +185,40 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
  *
  * \return None.
  */
+// Static buffer to accumulate response data across multiple receives
+static char accumulated_response[MAIN_WIFI_M2M_BUFFER_SIZE * 2] = {0};
+static int accumulated_length = 0;
+static bool is_accumulating = false;
+static int receive_attempts = 0;
+static const int MAX_RECEIVE_ATTEMPTS = 2;
+
+
 static void socket_cb(SOCKET sock, uint8_t u8Msg, void *pvMsg)
 {
     /* Check for socket event on TCP socket. */
-    if (sock == m_tcp_client_socket) 
+    if (sock == m_tcp_client_socket)
     {
-        switch (u8Msg) 
+        switch (u8Msg)
         {
         case SOCKET_MSG_CONNECT:
         {
             tstrSocketConnectMsg *pstrConnect = (tstrSocketConnectMsg *)pvMsg;
-            if (pstrConnect && pstrConnect->s8Error >= SOCK_ERR_NO_ERROR) 
+            if (pstrConnect && pstrConnect->s8Error >= SOCK_ERR_NO_ERROR)
             {
                 nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Successfully connected.\r\n");
-                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Retrieving weather data...\r\n");
+                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Generating NFC link...\r\n");
+
+                // Reset our accumulation variables
+                memset(accumulated_response, 0, sizeof(accumulated_response));
+                accumulated_length = 0;
+                is_accumulating = true;
+                receive_attempts = 0;
+
                 send(m_tcp_client_socket, m_tcp_received_buffer, strlen((char *)m_tcp_received_buffer), 0);
                 memset(m_tcp_received_buffer, 0, sizeof(m_tcp_received_buffer));
                 recv(m_tcp_client_socket, &m_tcp_received_buffer[0], MAIN_WIFI_M2M_BUFFER_SIZE, 0);
-            } 
-            else 
+            }
+            else
             {
                 nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "\r\nConnect error! code(%d)\r\n", pstrConnect->s8Error);
                 close(m_tcp_client_socket);
@@ -162,73 +230,141 @@ static void socket_cb(SOCKET sock, uint8_t u8Msg, void *pvMsg)
 
         case SOCKET_MSG_RECV:
         {
-            char *pcIndxPtr;
-            char *pcEndPtr;
-
             tstrSocketRecvMsg *pstrRecv = (tstrSocketRecvMsg *)pvMsg;
-            if (pstrRecv && pstrRecv->s16BufferSize > 0) 
+            receive_attempts++;
+
+            if (pstrRecv && pstrRecv->s16BufferSize > 0)
             {
-                /* Get city name. */
-                pcIndxPtr = strstr((char *)pstrRecv->pu8Buffer, "name=");
-                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "City: ");
-                if (NULL != pcIndxPtr)
+                // Append this chunk to our accumulated response if there's room
+                if (accumulated_length + pstrRecv->s16BufferSize < sizeof(accumulated_response))
                 {
-                    pcIndxPtr = pcIndxPtr + strlen("name=") + 1;
-                    pcEndPtr = strstr(pcIndxPtr, "\">");
-                    if (NULL != pcEndPtr) 
-                    {
-                        *pcEndPtr = 0;
-                    }
-
-                   nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", pcIndxPtr);
-                } 
-                else 
-                {
-                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A\r\n");
-                    goto exit_recv;
+                    memcpy(accumulated_response + accumulated_length, pstrRecv->pu8Buffer, pstrRecv->s16BufferSize);
+                    accumulated_length += pstrRecv->s16BufferSize;
+                    accumulated_response[accumulated_length] = '\0'; // Ensure null termination
                 }
 
-                /* Get temperature. */
-                pcIndxPtr = strstr(pcEndPtr + 1, "temperature value");
-                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Temperature: ");
-                if (NULL != pcIndxPtr) 
-                {
-                    pcIndxPtr = pcIndxPtr + strlen("temperature value") + 2;
-                    pcEndPtr = strstr(pcIndxPtr, "\" ");
-                    if (NULL != pcEndPtr) 
-                    {
-                        *pcEndPtr = 0;
-                    }
+                // Display received data for this chunk
+                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Received %d bytes (total accumulated: %d, attempt: %d)\r\n",
+                                pstrRecv->s16BufferSize, accumulated_length, receive_attempts);
 
-                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", pcIndxPtr);
-                } 
-                else 
+                // Continue receiving if we don't have JSON content yet and haven't exceeded max attempts
+                bool have_json = (strstr(accumulated_response, "{") != NULL);
+                bool should_continue = (!have_json && receive_attempts < MAX_RECEIVE_ATTEMPTS) ||
+                                       (pstrRecv->u16RemainingSize > 0);
+
+                if (should_continue)
                 {
-                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A\r\n");
-                    goto exit_recv;
+                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Continuing to receive data...\r\n");
+                    recv(sock, &m_tcp_received_buffer[0], MAIN_WIFI_M2M_BUFFER_SIZE, 0);
+                    return;
                 }
 
-                /* Get weather condition. */
-                pcIndxPtr = strstr(pcEndPtr + 1, "weather number");
-                if (NULL != pcIndxPtr) 
+                // Process the accumulated response once we've received everything
+                char value_buffer[256];
+
+                // Display the entire response for debugging
+                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Complete response: %s\r\n", accumulated_response);
+
+                // Process HTTP response
+                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Operation status: ");
+                if (strstr(accumulated_response, "HTTP/1.1 200 OK"))
                 {
-                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Weather Condition: ");
-                    pcIndxPtr = pcIndxPtr + strlen("weather number") + 14;
-                    pcEndPtr = strstr(pcIndxPtr, "\" ");
-                    if (NULL != pcEndPtr) 
+                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "Success\r\n");
+
+                    // Find the actual JSON payload
+                    char *json_start = accumulated_response;
+
+                    // First, look for the end of headers
+                    char *headers_end = strstr(accumulated_response, "\r\n\r\n");
+                    if (headers_end)
                     {
-                        *pcEndPtr = 0;
+                        json_start = headers_end + 4;
                     }
-                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", pcIndxPtr);
+
+                    // Look for the beginning of the JSON object
+                    char *brace = strchr(json_start, '{');
+                    if (brace)
+                    {
+                        json_start = brace;
+
+                        // Debug - print the JSON part
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "JSON part: %s\r\n", json_start);
+
+                        // Parse and display token
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Token: ");
+                        if (find_json_string_value(json_start, "token", value_buffer, sizeof(value_buffer)))
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", value_buffer);
+                        }
+                        else
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A (not found)\r\n");
+                        }
+
+                        // Parse and display URL
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "URL: ");
+                        if (find_json_string_value(json_start, "url", value_buffer, sizeof(value_buffer)))
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", value_buffer);
+                        }
+                        else
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A (not found)\r\n");
+                        }
+
+                        // Parse and display expires time
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Expires: ");
+                        if (find_json_string_value(json_start, "expires", value_buffer, sizeof(value_buffer)))
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", value_buffer);
+                        }
+                        else
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A (not found)\r\n");
+                        }
+
+                        // Parse and display expires in
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Expires in: ");
+                        if (find_json_string_value(json_start, "expiresIn", value_buffer, sizeof(value_buffer)))
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "%s\r\n", value_buffer);
+                        }
+                        else
+                        {
+                            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "N/A (not found)\r\n");
+                        }
+                    }
+                    else
+                    {
+                        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Could not find JSON object start '{' after %d receive attempts\r\n",
+                                        receive_attempts);
+                    }
                 }
-            } 
-            else 
-            {
-                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "\r\nSocket receive error!\r\n");
+                else
+                {
+                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_OPTION, "Failed\r\n");
+                }
             }
-exit_recv:            
+            else
+            {
+                // Even with no data, try to receive more if we don't have JSON yet and haven't reached max attempts
+                bool have_json = (strstr(accumulated_response, "{") != NULL);
+                if (!have_json && receive_attempts < MAX_RECEIVE_ATTEMPTS)
+                {
+                    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "No data received, but trying again (attempt %d/%d)...\r\n",
+                                    receive_attempts, MAX_RECEIVE_ATTEMPTS);
+                    recv(sock, &m_tcp_received_buffer[0], MAIN_WIFI_M2M_BUFFER_SIZE, 0);
+                    return;
+                }
+
+                nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "\r\nSocket receive error or end of data!\r\n");
+            }
+
+            // Reset accumulation state
+            is_accumulating = false;
+
             nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Press <Enter> to continue...");
-            nrf_cli_process(mp_curr_cli);
+            // nrf_cli_process(mp_curr_cli); // Line of code that the programme gets stuck on  This was magic
             close(m_tcp_client_socket);
             m_tcp_client_socket = -1;
         }
@@ -239,9 +375,6 @@ exit_recv:
         }
     }
 }
-
-
-
 
 /**
  * \brief Callback to get the Wi-Fi status update.
@@ -256,13 +389,17 @@ exit_recv:
  */
 static void wifi_cb(uint8_t u8MsgType, void *pvMsg)
 {
-    switch (u8MsgType) {
+    switch (u8MsgType)
+    {
     case M2M_WIFI_RESP_CON_STATE_CHANGED:
     {
         tstrM2mWifiStateChanged *pstrWifiState = (tstrM2mWifiStateChanged *)pvMsg;
-        if (pstrWifiState->u8CurrState == M2M_WIFI_CONNECTED) {
+        if (pstrWifiState->u8CurrState == M2M_WIFI_CONNECTED)
+        {
             m2m_wifi_request_dhcp_client();
-        } else if (pstrWifiState->u8CurrState == M2M_WIFI_DISCONNECTED) {
+        }
+        else if (pstrWifiState->u8CurrState == M2M_WIFI_DISCONNECTED)
+        {
             nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "\r\nWi-Fi disconnected\r\n");
             nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Press <Enter> to continue...");
             nrf_cli_process(mp_curr_cli);
@@ -282,7 +419,7 @@ static void wifi_cb(uint8_t u8MsgType, void *pvMsg)
         uint8_t *pu8IPAddress = (uint8_t *)pvMsg;
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "\r\nWi-Fi connected\r\n");
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Wi-Fi IP is %u.%u.%u.%u\r\n",
-                pu8IPAddress[0], pu8IPAddress[1], pu8IPAddress[2], pu8IPAddress[3]);
+                        pu8IPAddress[0], pu8IPAddress[1], pu8IPAddress[2], pu8IPAddress[3]);
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Press <Enter> to continue...");
         nrf_cli_process(mp_curr_cli);
 
@@ -295,16 +432,16 @@ static void wifi_cb(uint8_t u8MsgType, void *pvMsg)
 
     case M2M_WIFI_RESP_CONN_INFO:
     {
-        tstrM2MConnInfo *pstrConnInfo = (tstrM2MConnInfo*)pvMsg;
+        tstrM2MConnInfo *pstrConnInfo = (tstrM2MConnInfo *)pvMsg;
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "\r\nCONNECTED AP INFO\r\n");
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "SSID                : %s\r\n", pstrConnInfo->acSSID);
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "SEC TYPE            : %s\r\n", strSecType[pstrConnInfo->u8SecType]);
-        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Signal Strength     : %d\r\n", pstrConnInfo->s8RSSI); 
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Signal Strength     : %d\r\n", pstrConnInfo->s8RSSI);
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "RF Channel          : %d\r\n", pstrConnInfo->u8CurrChannel);
-        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Local IP Address    : %d.%d.%d.%d\r\n", 
-                    pstrConnInfo->au8IPAddr[0] , pstrConnInfo->au8IPAddr[1], pstrConnInfo->au8IPAddr[2], pstrConnInfo->au8IPAddr[3]);
-        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "MAC Address         : %02X:%02X:%02X:%02X:%02X:%02X\r\n", 
-                    pstrConnInfo->au8MACAddress[0] , pstrConnInfo->au8MACAddress[1], pstrConnInfo->au8MACAddress[2], pstrConnInfo->au8MACAddress[3], pstrConnInfo->au8MACAddress[4], pstrConnInfo->au8MACAddress[5]);
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Local IP Address    : %d.%d.%d.%d\r\n",
+                        pstrConnInfo->au8IPAddr[0], pstrConnInfo->au8IPAddr[1], pstrConnInfo->au8IPAddr[2], pstrConnInfo->au8IPAddr[3]);
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "MAC Address         : %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+                        pstrConnInfo->au8MACAddress[0], pstrConnInfo->au8MACAddress[1], pstrConnInfo->au8MACAddress[2], pstrConnInfo->au8MACAddress[3], pstrConnInfo->au8MACAddress[4], pstrConnInfo->au8MACAddress[5]);
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Press <Enter> to continue...");
         nrf_cli_process(mp_curr_cli);
         break;
@@ -316,7 +453,6 @@ static void wifi_cb(uint8_t u8MsgType, void *pvMsg)
     }
     }
 }
-
 
 /**@brief Function for Wi-Fi module initialization.
  */
@@ -335,18 +471,26 @@ void wifi_setup(void)
     /* Initialize Wi-Fi driver with data and status callbacks. */
     param.pfAppWifiCb = wifi_cb;
     ret = m2m_wifi_init(&param);
-    if (M2M_SUCCESS != ret) 
+    if (M2M_SUCCESS != ret)
     {
-        while (true) 
+        while (true)
         {
             bsp_board_led_invert(1);
             nrf_delay_ms(200);
         }
     }
 
+    /* Configure power save mode AFTER initialization */
+    ret = m2m_wifi_set_sleep_mode(M2M_NO_PS, 1);
+    if (M2M_SUCCESS != ret)
+    {
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "Failed to set power mode\r\n");
+    }
+
     /* Get MAC Address from OTP. */
     m2m_wifi_get_otp_mac_address(m_mac_addr, &u8IsMacAddrValid);
-    if (!u8IsMacAddrValid) {
+    if (!u8IsMacAddrValid)
+    {
         /* Cannot found MAC Address from OTP. Set user define MAC address. */
         m_user_define_mac_address[3] = NRF_FICR->DEVICEID[0] & 0xFF;
         m_user_define_mac_address[4] = (NRF_FICR->DEVICEID[0] >> 8) & 0xFF;
@@ -364,16 +508,15 @@ void wifi_setup(void)
  */
 void wifi_process(void)
 {
-    while(m2m_wifi_handle_events(NULL) != M2M_SUCCESS)
+    while (m2m_wifi_handle_events(NULL) != M2M_SUCCESS)
     {
         // No implementation needed.
     }
 }
 
-
 /**@brief wifi command implementation.
  */
-static void cmd_wifi(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_wifi(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
     ASSERT(p_cli);
     ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
@@ -387,13 +530,12 @@ static void cmd_wifi(nrf_cli_t const * p_cli, size_t argc, char **argv)
     nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %s: command not found\r\n", argv[0], argv[1]);
 }
 
-
 /**@brief wifi connect command implementation.
  */
-static void cmd_wifi_connect(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_wifi_connect(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
     uint8_t sec_type = M2M_WIFI_SEC_OPEN;
-    char * p_auth_info = NULL;
+    char *p_auth_info = NULL;
 
     ASSERT(p_cli);
     ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
@@ -404,7 +546,7 @@ static void cmd_wifi_connect(nrf_cli_t const * p_cli, size_t argc, char **argv)
         return;
     }
 
-    if(argc > 3)
+    if (argc > 3)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Unknown parameters\r\n");
         return;
@@ -412,14 +554,14 @@ static void cmd_wifi_connect(nrf_cli_t const * p_cli, size_t argc, char **argv)
 
     mp_curr_cli = p_cli;
 
-    if(argc == 1)
+    if (argc == 1)
     {
         /* Attempt to reconnect to the last-associated AP */
         m2m_wifi_default_connect();
         return;
     }
 
-    if(argc == 3)
+    if (argc == 3)
     {
         sec_type = M2M_WIFI_SEC_WPA_PSK;
         p_auth_info = argv[2];
@@ -429,34 +571,29 @@ static void cmd_wifi_connect(nrf_cli_t const * p_cli, size_t argc, char **argv)
     m2m_wifi_connect((char *)argv[1], strlen(argv[1]), sec_type, (void *)p_auth_info, M2M_WIFI_CH_ALL);
 }
 
-
 /**@brief wifi disconnect command implementation.
  */
-static void cmd_wifi_disconnect(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_wifi_disconnect(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
-    ASSERT(p_cli);
-    ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
-
-    if (nrf_cli_help_requested(p_cli))
-    {
-        nrf_cli_help_print(p_cli, NULL, 0);
-        return;
+    // Reset socket state variables
+    is_accumulating = false;
+    receive_attempts = 0;
+    accumulated_length = 0;
+    
+    // Force close any open socket
+    if (m_tcp_client_socket != -1) {
+        nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Closing open socket\r\n");
+        close(m_tcp_client_socket);
+        m_tcp_client_socket = -1;
     }
-
-    if(argc > 1)
-    {
-        nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Unknown parameters\r\n");
-        return;
-    }
-
+    
     m2m_wifi_disconnect();
-
     mp_curr_cli = p_cli;
 }
 
 /**@brief wifi status command implementation.
  */
-static void cmd_wifi_status(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_wifi_status(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
     ASSERT(p_cli);
     ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
@@ -467,14 +604,14 @@ static void cmd_wifi_status(nrf_cli_t const * p_cli, size_t argc, char **argv)
         return;
     }
 
-    if(argc > 1)
+    if (argc > 1)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Unknown parameters\r\n");
         return;
     }
 
     // Get the current AP information.
-    if(m2m_wifi_get_connection_info() != M2M_SUCCESS)
+    if (m2m_wifi_get_connection_info() != M2M_SUCCESS)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Fail to get the current AP information\r\n");
     }
@@ -482,9 +619,9 @@ static void cmd_wifi_status(nrf_cli_t const * p_cli, size_t argc, char **argv)
     mp_curr_cli = p_cli;
 }
 
-/**@brief weather command implementation.
+/**@brief nfc command implementation.
  */
-static void cmd_weather(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_nfc(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
     ASSERT(p_cli);
     ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
@@ -498,59 +635,55 @@ static void cmd_weather(nrf_cli_t const * p_cli, size_t argc, char **argv)
     nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "%s %s: command not found\r\n", argv[0], argv[1]);
 }
 
-
-/**@brief weather get command implementation.
+/**@brief nfc generate-link command implementation.
  */
-static void cmd_weather_get(nrf_cli_t const * p_cli, size_t argc, char **argv)
+static void cmd_nfc_generate_link(nrf_cli_t const *p_cli, size_t argc, char **argv)
 {
     ASSERT(p_cli);
     ASSERT(p_cli->p_ctx && p_cli->p_iface && p_cli->p_name);
 
-    if ((argc == 1) || nrf_cli_help_requested(p_cli))
+    if (nrf_cli_help_requested(p_cli))
     {
         nrf_cli_help_print(p_cli, NULL, 0);
         return;
     }
 
-    if(argc != 3)
+    if (argc != 1)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_ERROR, "Unknown parameters\r\n");
         return;
     }
 
-    if(!m_wifi_connected)
+    if (!m_wifi_connected)
     {
         nrf_cli_fprintf(p_cli, NRF_CLI_NORMAL, "Connect to the Wi-Fi first\r\n");
-        return; 
+        return;
     }
 
     /* Obtain the IP Address by host name */
     gethostbyname((uint8_t *)m_server_host_name);
 
     memset(m_tcp_received_buffer, 0, sizeof(m_tcp_received_buffer));
-    sprintf((char *)m_tcp_received_buffer, "GET /data/2.5/weather?q=%s&appid=%s&mode=xml&units=metric HTTP/1.1\r\nHost: %s\r\nAccept: */*\r\n\r\n", 
-            argv[1], argv[2], MAIN_WEATHER_SERVER_NAME);
+    sprintf((char *)m_tcp_received_buffer,
+            "GET /api/nfc/generate-link HTTP/1.1\r\n"
+            "Host: %s:%d\r\n"
+            "Connection: close\r\n"
+            "\r\n",
+            MAIN_NFC_SERVER_NAME, MAIN_HOST_PORT);
 
     mp_curr_cli = p_cli;
 }
 
-
-NRF_CLI_CREATE_STATIC_SUBCMD_SET(m_sub_wifi)
-{
+NRF_CLI_CREATE_STATIC_SUBCMD_SET(m_sub_wifi){
     NRF_CLI_CMD(connect, NULL, "Connect to an AP. Usage: wifi connect {SSID} {PSK}", cmd_wifi_connect),
     NRF_CLI_CMD(disconnect, NULL, "Disconnect from the AP", cmd_wifi_disconnect),
     NRF_CLI_CMD(status, NULL, "Display Wi-Fi connection status", cmd_wifi_status),
-    NRF_CLI_SUBCMD_SET_END
-};
+    NRF_CLI_SUBCMD_SET_END};
 
 NRF_CLI_CMD_REGISTER(wifi, &m_sub_wifi, "Commands for Wi-Fi access", cmd_wifi);
 
-NRF_CLI_CREATE_STATIC_SUBCMD_SET(m_sub_weahter)
-{
-    NRF_CLI_CMD(get, NULL, "Display weather data. Usage: weather get [CITY_NAME] [APIKEY]", cmd_weather_get),
-    NRF_CLI_SUBCMD_SET_END
-};
+NRF_CLI_CREATE_STATIC_SUBCMD_SET(m_sub_nfc){
+    NRF_CLI_CMD(generatelink, NULL, "Generate an NFC link", cmd_nfc_generate_link),
+    NRF_CLI_SUBCMD_SET_END};
 
-NRF_CLI_CMD_REGISTER(weather, &m_sub_weahter, "Commands for Weather API", cmd_weather);
-
-
+NRF_CLI_CMD_REGISTER(nfc, &m_sub_nfc, "Commands for NFC Link API", cmd_nfc);

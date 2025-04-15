@@ -79,11 +79,14 @@
 #include "nrf_stack_guard.h"
 #include "nrf_fstorage_sd.h"
 
+#include "nfc_wifi_client.h"
+
 #if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
 #define CLI_OVER_USB_CDC_ACM 1
 #else
 #define CLI_OVER_USB_CDC_ACM 0
 #endif
+
 
 #if defined(NRF_CLI_UART_ENABLED) && NRF_CLI_UART_ENABLED
 #define CLI_OVER_UART 1
@@ -109,6 +112,8 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_backend_flash.h"
+
+extern void nfc_client_set_cli(nrf_cli_t const * p_cli);
 
 #define SCHED_MAX_EVENT_DATA_SIZE       APP_TIMER_SCHED_EVENT_DATA_SIZE             /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                60                                          /**< Maximum number of events in the scheduler queue. */
@@ -859,6 +864,13 @@ static void core_init(void)
     APP_ERROR_CHECK(nrf_cli_init(&m_cli_uart, &uart_config, true, true, NRF_LOG_SEVERITY_INFO));
 #endif
 
+    // Initialize NFC client with CLI reference - ADD THIS HERE
+#if CLI_OVER_UART
+    nfc_client_set_cli(&m_cli_uart);
+#elif CLI_OVER_USB_CDC_ACM
+    nfc_client_set_cli(&m_cli_cdc_acm);
+#endif
+
     APP_ERROR_CHECK(nrf_drv_clock_init());
 
     nrf_drv_clock_lfclk_request(NULL);
@@ -878,7 +890,6 @@ static void core_init(void)
 #if CLI_OVER_UART
     APP_ERROR_CHECK(nrf_cli_task_create(&m_cli_uart));
 #endif
-
 }
 
 
