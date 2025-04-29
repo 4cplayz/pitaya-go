@@ -48,10 +48,13 @@
 #include "socket/include/socket.h"
 
 // Forward declarations
+// Forward declarations
 static void nfc_init(void);
 static void timers_init(void);
 static void leds_init(void);
-void nfc_client_init(void); // Add this line
+static void set_nfc_refresh_interval(uint32_t new_interval_ms);
+void nfc_client_init(void);
+void nfc_set_refresh_interval(uint32_t interval_ms);
 
 /* Configuration - customize these values */
 #define MAIN_HOST_PORT 10000
@@ -72,6 +75,9 @@ void nfc_client_init(void); // Add this line
 
 /* NFC link refresh interval in milliseconds */
 #define NFC_LINK_REFRESH_INTERVAL_MS 60000 // 1 minute (adjust as needed)
+
+/* Current NFC refresh interval - can be changed dynamically */
+static uint32_t m_current_nfc_refresh_interval = NFC_LINK_REFRESH_INTERVAL_MS;
 
 /* LED indicators */
 #define LED_WIFI_CONNECTED LED_B_IDX
@@ -146,6 +152,9 @@ static nfc_link_data_t m_current_nfc_link = {0};
 // NFC variables
 static uint8_t m_ndef_msg_buf[256];
 
+// Flag to track if NFC field has been detected and should use fast mode
+static bool m_nfc_fast_mode_enabled = false;
+
 /**
  * \brief Update the NFC tag with current URL
  */
@@ -210,6 +219,15 @@ static void update_nfc_tag(void)
     }
 
     nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC tag updated successfully with HTTPS URL\r\n");
+
+    // After successful update, return to slow mode if we were in fast mode
+    if (m_nfc_fast_mode_enabled)
+    {
+        m_nfc_fast_mode_enabled = false;
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Tag updated successfully - returning to slow mode\r\n");
+        set_nfc_refresh_interval(NFC_LINK_REFRESH_INTERVAL_MS); // Switch back to normal interval
+    }
+
     nrf_cli_process(mp_curr_cli);
 }
 
@@ -711,6 +729,15 @@ static void nfc_callback(void *p_context, nfc_t2t_event_t event, const uint8_t *
     case NFC_T2T_EVENT_FIELD_OFF:
         bsp_board_led_off(LED_NFC_ACTIVITY);
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC field lost\r\n");
+
+        // When NFC field is removed, enable fast mode to quickly refresh
+        if (!m_nfc_fast_mode_enabled)
+        {
+            m_nfc_fast_mode_enabled = true;
+            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC field detected - switching to fast mode\r\n");
+            set_nfc_refresh_interval(1000); // Switch to 1 second interval
+        }
+
         nrf_cli_process(mp_curr_cli);
         break;
 
@@ -818,6 +845,28 @@ static void nfc_refresh_timer_handler(void *p_context)
         nrf_cli_process(mp_curr_cli);
         request_nfc_link();
     }
+    else if (m_nfc_request_in_progress)
+    {
+        // If request is in progress, keep fast interval if in fast mode
+        if (m_nfc_fast_mode_enabled && m_current_nfc_refresh_interval != 1000)
+        {
+            set_nfc_refresh_interval(1000);
+        }
+    }
+    else
+    {
+        // If no active request and we need to adjust the interval based on mode
+        if (m_nfc_fast_mode_enabled && m_current_nfc_refresh_interval != 1000)
+        {
+            // We should be in fast mode but aren't
+            set_nfc_refresh_interval(1000);
+        }
+        else if (!m_nfc_fast_mode_enabled && m_current_nfc_refresh_interval != NFC_LINK_REFRESH_INTERVAL_MS)
+        {
+            // We should be in slow mode but aren't
+            set_nfc_refresh_interval(NFC_LINK_REFRESH_INTERVAL_MS);
+        }
+    }
 }
 
 /**
@@ -840,10 +889,10 @@ static void start_nfc_refresh_timer(void)
     ret_code_t err_code;
 
     // Start timer with configured interval
-    err_code = app_timer_start(m_nfc_refresh_timer, APP_TIMER_TICKS(NFC_LINK_REFRESH_INTERVAL_MS), NULL);
+    err_code = app_timer_start(m_nfc_refresh_timer, APP_TIMER_TICKS(m_current_nfc_refresh_interval), NULL);
     APP_ERROR_CHECK(err_code);
 
-    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC refresh timer started (%d ms interval)\r\n", NFC_LINK_REFRESH_INTERVAL_MS);
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC refresh timer started (%d ms interval)\r\n", m_current_nfc_refresh_interval);
     nrf_cli_process(mp_curr_cli);
 }
 
@@ -1064,4 +1113,48 @@ void nfc_client_init(void)
 
     nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC functionality initialized\r\n");
     nrf_cli_process(mp_curr_cli);
+}
+
+/**
+ * \brief Change the NFC refresh interval and restart the timer
+ *
+ * @param new_interval_ms New interval in milliseconds
+ */
+static void set_nfc_refresh_interval(uint32_t new_interval_ms)
+{
+    ret_code_t err_code;
+
+    // Stop the current timer
+    app_timer_stop(m_nfc_refresh_timer);
+
+    // Update the interval value
+    m_current_nfc_refresh_interval = new_interval_ms;
+
+    // Restart timer with new interval
+    err_code = app_timer_start(m_nfc_refresh_timer, APP_TIMER_TICKS(m_current_nfc_refresh_interval), NULL);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC refresh interval changed to %d ms\r\n",
+                    m_current_nfc_refresh_interval);
+    nrf_cli_process(mp_curr_cli);
+}
+
+/**
+ * @brief Set NFC refresh interval to a new value
+ *
+ * This function can be called from outside to change the NFC
+ * refresh interval. It will stop the current timer and start
+ * a new one with the specified interval.
+ *
+ * @param interval_ms Interval in milliseconds
+ */
+void nfc_set_refresh_interval(uint32_t interval_ms)
+{
+    if (mp_curr_cli != NULL)
+    {
+        nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Setting NFC refresh interval to %d ms\r\n", interval_ms);
+        nrf_cli_process(mp_curr_cli);
+    }
+
+    set_nfc_refresh_interval(interval_ms);
 }
