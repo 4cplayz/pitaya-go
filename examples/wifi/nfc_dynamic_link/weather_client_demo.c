@@ -54,9 +54,9 @@ static void leds_init(void);
 void nfc_client_init(void); // Add this line
 
 /* Configuration - customize these values */
-#define MAIN_HOST_PORT 443 // Changed to 443 for HTTPS
-#define MAIN_NFC_SERVER_NAME "iato.ca"
-#define MAIN_USE_SSL 1 // Enable SSL
+#define MAIN_HOST_PORT 10000
+#define MAIN_NFC_SERVER_NAME "82.25.92.122"
+#define MAIN_USE_SSL 0 // Disable SSL for server connection
 
 /* HTTP Request formatting */
 #define HTTP_REQUEST_TEMPLATE                 \
@@ -66,8 +66,8 @@ void nfc_client_init(void); // Add this line
     "\r\n"
 
 /* Wi-Fi credentials */
-#define WIFI_SSID "CAL-Techno"             // Replace with your Wi-Fi SSID
-#define WIFI_PASSWORD "technophys123"      // Replace with your Wi-Fi password
+#define WIFI_SSID "iato"                   // Replace with your Wi-Fi SSID
+#define WIFI_PASSWORD "12345678"           // Replace with your Wi-Fi password
 #define WIFI_SECURITY M2M_WIFI_SEC_WPA_PSK // Use appropriate security type
 
 /* NFC link refresh interval in milliseconds */
@@ -173,11 +173,12 @@ static void update_nfc_tag(void)
     uint8_t new_msg_buf[256];
     uint32_t len = sizeof(new_msg_buf);
 
-    // Encode the URI message with HTTP prefix using the full URL
+    // Encode the URI message with HTTPS prefix using the full URL
     const uint8_t *url_data = (const uint8_t *)full_url;
     uint8_t url_len = strlen(full_url);
 
-    err_code = nfc_uri_msg_encode(NFC_URI_HTTP, url_data, url_len, new_msg_buf, &len);
+    // Use NFC_URI_HTTPS to ensure HTTPS URLs
+    err_code = nfc_uri_msg_encode(NFC_URI_HTTPS, url_data, url_len, new_msg_buf, &len);
     if (err_code != NRF_SUCCESS)
     {
         nrf_cli_fprintf(mp_curr_cli, NRF_CLI_ERROR, "Failed to encode NFC message. Error: 0x%X\r\n", err_code);
@@ -208,7 +209,7 @@ static void update_nfc_tag(void)
         return;
     }
 
-    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC tag updated successfully with full URL\r\n");
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC tag updated successfully with HTTPS URL\r\n");
     nrf_cli_process(mp_curr_cli);
 }
 
@@ -396,7 +397,7 @@ static bool request_nfc_link(void)
     }
 
     // Resolve the server hostname
-    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Requesting NFC link from server %s (HTTPS)\r\n", m_server_host_name);
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Requesting NFC link from server %s (HTTP)\r\n", m_server_host_name);
     gethostbyname((uint8_t *)m_server_host_name);
 
     // Reset state variables for receiving response
@@ -454,8 +455,7 @@ static void nfc_request_complete(bool success)
 static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
 {
     struct sockaddr_in addr_in;
-    int ssl_cert_bypass = 1;  
-    uint32_t u32Timeout = 10000;  // 10 second timeout
+    uint32_t u32Timeout = 10000; // 10 second timeout
 
     nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "\r\n%s IP address is %d.%d.%d.%d\r\n", hostName,
                     (int)IPV4_BYTE(hostIp, 0), (int)IPV4_BYTE(hostIp, 1),
@@ -465,20 +465,14 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
     addr_in.sin_port = _htons(MAIN_HOST_PORT);
     addr_in.sin_addr.s_addr = hostIp;
 
-    /* Create secure socket using SSL */
+    /* Create regular socket (no SSL) */
     if (m_tcp_client_socket < 0)
     {
-        /* Use SOCKET_FLAGS_SSL for HTTPS connections */
-        m_tcp_client_socket = socket(AF_INET, SOCK_STREAM, SOCKET_FLAGS_SSL);
-        
-        /* Set options if socket created successfully */
-        if (m_tcp_client_socket >= 0) {
-            // Bypass SSL certificate verification
-            setsockopt(m_tcp_client_socket, SOL_SSL_SOCKET, SO_SSL_BYPASS_X509_VERIF, &ssl_cert_bypass, sizeof(ssl_cert_bypass));
-            
-            // Try alternative socket option for timeout
-            // Note: Using just the bypass may be enough to solve your connection issue
-            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Socket created with SSL, ID=%d (certificate verification bypassed)\r\n", m_tcp_client_socket);
+        m_tcp_client_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+        if (m_tcp_client_socket >= 0)
+        {
+            nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Socket created, ID=%d\r\n", m_tcp_client_socket);
         }
     }
 
@@ -520,7 +514,7 @@ static void resolve_cb(uint8_t *hostName, uint32_t hostIp)
         return;
     }
 
-    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Connecting to server using SSL (HTTPS)...\r\n");
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "Connected to server...\r\n");
     nrf_cli_process(mp_curr_cli);
 }
 
@@ -877,8 +871,8 @@ static void nfc_init(void)
     const uint8_t default_url[] = {'m', 'a', 'k', 'e', 'r', 'd', 'i', 'a', 'r', 'y', '.', 'c', 'o', 'm'};
     uint32_t len = sizeof(m_ndef_msg_buf);
 
-    // Encode URI message
-    err_code = nfc_uri_msg_encode(NFC_URI_HTTP_WWW,
+    // Encode URI message with HTTPS prefix
+    err_code = nfc_uri_msg_encode(NFC_URI_HTTPS,
                                   default_url,
                                   sizeof(default_url),
                                   m_ndef_msg_buf,
@@ -905,7 +899,7 @@ static void nfc_init(void)
         return;
     }
 
-    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC Tag emulation started with default URL\r\n");
+    nrf_cli_fprintf(mp_curr_cli, NRF_CLI_NORMAL, "NFC Tag emulation started with default HTTPS URL\r\n");
     nrf_cli_process(mp_curr_cli);
 }
 
